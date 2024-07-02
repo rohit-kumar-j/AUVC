@@ -1,0 +1,9 @@
+-I
+.
+-g
+-Wall
+-Wextra
+-Werror
+-pedantic
+-D_USE_MINGW_ANSI_STDIO
+-ferror-limit=0
