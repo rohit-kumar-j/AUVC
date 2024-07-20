@@ -30,6 +30,8 @@
 /*** AUVC ***/
 #include <dlfcn.h>
 #include "AUVC/AUVC/controller.h"
+#include "mujoco/mjmodel.h"
+#include "mujoco/mjtnum.h"
 plug_test_t plug_controller_test;
 plug_init_t plug_controller_init;
 plug_update_t plug_controller_update;
@@ -571,8 +573,54 @@ void ShowSensor(mj::Simulate* sim, mjrRect rect) {
   mjr_figure(viewport, &sim->figsensor, &sim->platform_ui->mjr_context());
 }
 
+
+void renderActuatorForces(mjModel* m, mjData* d, mjvOption* opt, mjvPerturb* pert, mjvCamera* cam, mjvScene* scn){
+    const char* thruster_names[6] = {"st1","st2","st3","st4","st5","st6"};
+    const char* actuator_names[6] = {"a1","a2","a3","a4","a5","a6"};
+    for(int i=0; i<6; i++){
+        int idx = mj_name2id(m, mjOBJ_SITE, thruster_names[i]);
+        int act_idx = mj_name2id(m, mjOBJ_ACTUATOR, actuator_names[i]);
+        // printf("thruster[%d] idx: %d\n",i,idx);
+        mjvGeom *g = &scn->geoms[scn->ngeom];
+        g->type=  mjGEOM_ARROW;
+        mjtNum size[3];
+        size[0]= 0.05;   // radius
+        size[1]= 0.05;
+        size[2]= d->ctrl[act_idx]*0.02;  // length = force applied along z-axis
+        mjtNum pos[3];
+        pos[0]=d->site_xpos[3*idx + 0];
+        pos[1]=d->site_xpos[3*idx + 1];
+        pos[2]=d->site_xpos[3*idx + 2];
+        float rgba[4];
+        if(size[2]<=0) {
+          rgba[0]= 1; rgba[1]= 0; rgba[2]= 0; rgba[3]= 1; }
+        else{
+          rgba[0]= 0; rgba[1]= 1; rgba[2]= 0; rgba[3]= 1; }
+        // Default values
+        g->dataid = -1;
+        g->objtype = mjOBJ_UNKNOWN; // mjOBJ_GEOM
+        g->objid = -1;
+        g->category = mjCAT_DECOR;
+        g->matid = -1;
+        g->texcoord = -1;
+        g->segid = -1;
+        g->emission = 0;
+        g->specular = 0.5;
+        g->shininess = 0.5;
+        g->reflectance = 0;
+
+        mjtNum mat[9];
+          for (int j = 0; j < 9; ++j) {
+              mat[j] = d->site_xmat[9*idx+j];
+          }
+        mjv_initGeom(g, mjGEOM_ARROW, size, pos, mat, rgba);
+        scn->ngeom +=1;
+    }
+
+}
+
 /*** AUVC ***/
-void ShowSubCAM(mj::Simulate* sim, mjrRect rect, mjvScene* scn, mjvOption* opt, mjvPerturb* pert){
+void ShowSubCAM(mj::Simulate* sim, mjrRect rect, mjvScene* scn, mjvCamera cam, mjvOption* opt, mjvPerturb* pert){
   // Refer: https://github.com/dtorre38/mujoco_opencv/blob/fa9e61fcf5fa3f7048c4aac08dde4f3b37ea1f12/utils/render_insetwindow.c#L6
   mjrRect viewport = {
     rect.left + rect.width - rect.width/3,
@@ -593,6 +641,7 @@ void ShowSubCAM(mj::Simulate* sim, mjrRect rect, mjvScene* scn, mjvOption* opt, 
   offscreen_cam.fixedcamid = camera_id;
 
   mjv_updateScene(sim->m_, sim->d_, opt, pert, &offscreen_cam, mjCAT_ALL, scn);
+  renderActuatorForces(sim->m_, sim->d_, opt, pert, &cam, scn); /*** AUVC ***/
   mjr_render(viewport, &sim->scn, &sim->platform_ui->mjr_context());
 
   // glDrawPixels(viewport.width, viewport.height, GL_BGR, GL_UNSIGNED_BYTE, color_buffer);
@@ -2348,8 +2397,6 @@ bool Simulate::reloadPhysicsLibPlug(mjModel* m, mjData* d, bool test, bool load_
     return true;
 }
 
-
-
 //------------------------------------- load mjb or xml model --------------------------------------
 void Simulate::LoadOnRenderThread() {
   this->m_ = this->mnew_;
@@ -2662,50 +2709,9 @@ void Simulate::Render() {
     pending_.ui_update_ctrl = false;
   }
 
-
-  // FIX: Making Geoms
-
-  // mjvGeom geom_arrow;
-  // geom_arrow.type=  mjGEOM_ARROW;
-  // geom_arrow.size[0]= 0; // Origin point of geom(?)
-  // geom_arrow.size[1]= 0;
-  // geom_arrow.size[2]= 0;
-  //
-  // geom_arrow.pos[0]= 0;
-  // geom_arrow.pos[1]= 0;
-  // geom_arrow.pos[2]= 0;
-  //
-  // geom_arrow.mat[0]= 0;
-  // geom_arrow.mat[1]= 0;
-  // geom_arrow.mat[2]= 0;
-  // geom_arrow.mat[3]= 0;
-  // geom_arrow.mat[4]= 0;
-  // geom_arrow.mat[5]= 0;
-  // geom_arrow.mat[6]= 0;
-  // geom_arrow.mat[7]= 0;
-  // geom_arrow.mat[8]= 0;
-  //
-  // geom_arrow.rgba[0]= 0;
-  // geom_arrow.rgba[1]= 1;
-  // geom_arrow.rgba[2]= 0;
-  // geom_arrow.rgba[3]= 1;
-  // mjtNum from[3];
-  // from[0] = 0;
-  // from[1] = 0;
-  // from[2] = 0;
-  // mjtNum to[3];
-  // to[0] = 1;
-  // to[1] = 1;
-  // to[2] = 1;
-  //
-  // mjv_initGeom(&geom_arrow, mjGEOM_ARROW, NULL, NULL, NULL, NULL);
-  // mjv_addGeoms(m_, d_, &opt, &pert, mjCAT_ALL, &scn);
-  // mjv_connector(&geom_arrow, mjGEOM_ARROW, 1, from, to);
-  // mjv_updateCamera(m_, d_, &cam, &scn);
-
-
   // render scene
   mjv_updateScene(this->m_, this->d_, &opt, &pert, &cam, mjCAT_ALL, &scn);
+  renderActuatorForces(m_, d_, &opt, &pert, &cam, &scn); /*** AUVC ***/
   mjr_render(rect, &this->scn, &this->platform_ui->mjr_context());
 
   // show last loading error
@@ -2796,7 +2802,8 @@ void Simulate::Render() {
   };
   // const_viewport.left = const_viewport.left - const_viewport.left/2;
   if(this->ui0_enable){
-    const_viewport.left = rect.width - const_viewport.width/2;
+    const_viewport.left =rect.width/4;
+    // const_viewport.left = rect.width/4 - const_viewport.width/2;
   }
   if (this->profiler) {
     const_viewport.left -= rect.width/4;
@@ -2805,7 +2812,7 @@ void Simulate::Render() {
     const_viewport.left -= rect.width/4;
   }
   if(this->sub_camera){
-    ShowSubCAM(this, const_viewport, &scn, &opt, &pert);
+    ShowSubCAM(this, const_viewport, &scn, cam, &opt, &pert);
   }
 
   // take screenshot, save to file

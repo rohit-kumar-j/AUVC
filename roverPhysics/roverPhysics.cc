@@ -23,11 +23,11 @@ extern "C" bool roverPhysicsUpdatePlug(mjModel *m, mjData *d) {
     if(d->qpos[2] <= start_height - 0.1 ){
         float fnew = (force < max_bouyancy_force) ? (force) : (max_bouyancy_force);
         d->qfrc_applied[2] = fnew;
-        printf("UP:%0.4f | MAX_B: %0.4f\n",fnew, max_bouyancy_force);
+        // printf("UP:%0.4f | MAX_B: %0.4f\n",fnew, max_bouyancy_force);
     }
     if(d->qpos[2] >= start_height + 0.1 ){
         d->qfrc_applied[2] = (1 - d->qpos[2]) * water_gain;
-        printf("Down:%0.4f | MAX_B: %0.4f\n",force, max_bouyancy_force);
+        // printf("Down:%0.4f | MAX_B: %0.4f\n",force, max_bouyancy_force);
     }
 
     // TODO: Create figure to show forces
