@@ -575,17 +575,17 @@ void ShowSensor(mj::Simulate* sim, mjrRect rect) {
 
 
 void renderActuatorForces(mjModel* m, mjData* d, mjvOption* opt, mjvPerturb* pert, mjvCamera* cam, mjvScene* scn){
-    const char* thruster_names[6] = {"st1","st2","st3","st4","st5","st6"};
-    const char* actuator_names[6] = {"a1","a2","a3","a4","a5","a6"};
-    for(int i=0; i<6; i++){
+    const char* thruster_names[10] = {"st1","st2","st3","st4","st5","st6", "sfloat1","sfloat2","sfloat3","sfloat4"};
+    const char* actuator_names[10] = {"a1","a2","a3","a4","a5","a6", "sf1","sf2","sf3","sf4"};
+    for(int i=0; i<10; i++){
         int idx = mj_name2id(m, mjOBJ_SITE, thruster_names[i]);
         int act_idx = mj_name2id(m, mjOBJ_ACTUATOR, actuator_names[i]);
         // printf("thruster[%d] idx: %d\n",i,idx);
         mjvGeom *g = &scn->geoms[scn->ngeom];
         g->type=  mjGEOM_ARROW;
         mjtNum size[3];
-        size[0]= 0.05;   // radius
-        size[1]= 0.05;
+        size[0]= 0.02;   // radius
+        size[1]= 0.02;
         size[2]= d->ctrl[act_idx]*0.02;  // length = force applied along z-axis
         mjtNum pos[3];
         pos[0]=d->site_xpos[3*idx + 0];

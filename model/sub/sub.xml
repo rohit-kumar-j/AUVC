@@ -64,12 +64,29 @@
   <worldbody>
 
         <!-- full sub dimensions: 18 in x 13.3 in x 10 in-->
-        <body name="sub" pos="0 0 1" euler="0 0 0">
+        <body name="sub" pos="0 0 2" euler="0 0 0">
             <freejoint/>
             <geom name="sub_geom" type="box" rgba="0.9 0.9 0.8 0" size="0.4572 0.33782 0.254" mass="9" />
-            <geom name="box" type="mesh" euler="1.57 3.14 0" rgba="0.9 0.9 0.8 0.7" mesh="sub_mesh" size="0.4572 0.33782 0.254" mass="0.0001" />
+            <geom name="box" type="mesh" euler="1.57 3.14 0" rgba="0.9 0.9 0.8 1" mesh="sub_mesh" size="0.4572 0.33782 0.254" mass="0.0001" />
             <!-- <camera name="sub_track_cam" mode="track" pos="1 0 0"/> -->
             <!-- <camera name="sub_front_cam" mode="fixed" euler="0 1.57 0" pos="0 0 0" fovy="45"/> -->
+            <!-- Bouyancy -->
+            <body name="bfloat1" pos="-0.24 0.22 0.2">
+                <geom name="gfloat1" type="box" size=" 0.13 0.08 0.05" rgba="0 0.3 1 1" mass="0.0001"/>
+                <site name="sfloat1" />
+            </body>
+            <body name="bfloat2" pos="0.24 0.22 0.2">
+                <geom name="gfloat2" type="box" size=" 0.13 0.08 0.05" rgba="0 0.3 1 1" mass="0.0001"/>
+                <site name="sfloat2" />
+            </body>
+            <body name="bfloat3" pos="0.24 -0.22 0.2">
+                <geom name="gfloat3" type="box" size=" 0.13 0.08 0.05" rgba="0 0.3 1 1" mass="0.0001"/>
+                <site name="sfloat3" />
+            </body>
+            <body name="bfloat4" pos="-0.24 -0.22 0.2">
+                <geom name="gfloat4" type="box" size=" 0.13 0.08 0.05" rgba="0 0.3 1 1" mass="0.0001"/>
+                <site name="sfloat4" />
+            </body>
             <!-- Thruster -->
             <body name="bt1" euler="1.57 -0.73 0" pos="-0.27 0.19 0">
                 <geom name="thruster1" type="cylinder" size="0.09 0.05" rgba="1 0.3 0 1" mass="0.0001"/>
@@ -106,7 +123,7 @@
             </body>
             <body name="cam_cb1" euler="0 0 0" pos="0.3 0 0.13">
                 <geom type="cylinder" size="0.004 0.0030" rgba="1 1 0 1" mass="0.0001"/>
-                <joint type="hinge" axis="0 0 1"/>
+                <!-- <joint type="hinge" axis="0 0 1"/> -->
                 <body name="cam_cb2" euler="1.57 0 0">
                     <geom type="cylinder" mass="0.0001" size="0.04 0.03" rgba="1 0 0 1"/>
                     <geom type="cylinder" euler="0 1.57 0" mass="0.0001" size="0.02 0.04" pos="-0.01 0 0" rgba="1 1 0 1"/>
@@ -195,13 +212,17 @@
         <motor name="a3"  site="st3" gear="0 0 1 0 0 0"/>
         <motor name="a4"  site="st4" gear="0 0 1 0 0 0"/>
         <motor name="a5"  site="st5" gear="0 0 1 0 0 0"/>
-        <motor name="a6"  site="st5" gear="0 0 -1 0 0 0"/>
+        <motor name="a6"  site="st6" gear="0 0 1 0 0 0"/>
+        <motor name="sf1"  site="sfloat1" gear="0 0 1 0 0 0"/>
+        <motor name="sf2"  site="sfloat2" gear="0 0 1 0 0 0"/>
+        <motor name="sf3"  site="sfloat3" gear="0 0 1 0 0 0"/>
+        <motor name="sf4"  site="sfloat4" gear="0 0 1 0 0 0"/>
     </actuator>
 
     <sensor>
         <!-- <accelerometer name="Body_accel" site="imu"/> -->
         <!-- <gyro name="Body_Gyro" site="imu"/> -->
-        <framepos name="Body_Pos" objtype="site" objname="imu"/>
+        <!-- <framepos name="Body_Pos" objtype="site" objname="imu"/> -->
         <framequat name="Body_Quat" objtype="site" objname="imu"/>
     </sensor>
 
@@ -217,5 +238,9 @@
       <exclude body1="bt4" body2="full_pool"/>
       <exclude body1="bt5" body2="full_pool"/>
       <exclude body1="bt6" body2="full_pool"/>
+      <exclude body1="bfloat1" body2="full_pool"/>
+      <exclude body1="bfloat2" body2="full_pool"/>
+      <exclude body1="bfloat3" body2="full_pool"/>
+      <exclude body1="bfloat4" body2="full_pool"/>
     </contact>
 </mujoco>
