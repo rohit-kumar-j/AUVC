@@ -640,37 +640,41 @@ void ShowSubCAM(mj::Simulate* sim, mjrRect rect, mjvScene* scn, mjvCamera cam, m
   offscreen_cam.type = mjCAMERA_FIXED;
   offscreen_cam.fixedcamid = camera_id;
 
-  mjv_updateScene(sim->m_, sim->d_, opt, pert, &offscreen_cam, mjCAT_ALL, scn);
-  renderActuatorForces(sim->m_, sim->d_, opt, pert, &cam, scn); /*** AUVC ***/
+  mjv_updateScene(sim->m_, sim->d_, opt, NULL, &offscreen_cam, mjCAT_ALL, scn);
   mjr_render(viewport, &sim->scn, &sim->platform_ui->mjr_context());
+  renderActuatorForces(sim->m_, sim->d_, opt, pert, &cam, scn); /*** AUVC ***/
 
   // glDrawPixels(viewport.width, viewport.height, GL_BGR, GL_UNSIGNED_BYTE, color_buffer);
-  mjr_readPixels(color_buffer, depth_buffer,viewport, &sim->platform_ui->mjr_context());
+  mjr_readPixels(color_buffer, nullptr, viewport, &sim->platform_ui->mjr_context());
 
-  // float range = max_depth - min_depth;
-  for (int i = 0; i < viewport.height * viewport.width; i++) {
-    depth8[3 * i] = depth8[3 * i + 1] = depth8[3 * i + 2] = depth_buffer[i] * 255;
+  // unsigned int value = color_buffer[0];
+  // unsigned int red = (value & 0x00ff0000) >> 16; // extract red component (bits 16-23)
+  // unsigned int green = (value & 0x0000ff00) >> 8; // extract green component (bits 8-15)
+  // unsigned int blue = value & 0x000000ff; // extract blue component (bits 0-7)
+  for(int i=0; i<VIEWPORT_HEIGHT; i++){
+    for(int j=0; j<VIEWPORT_WIDTH; j++){
+      // int index = (i * VIEWPORT_WIDTH + j) * 3;
+
+      // unsigned char r = color_buffer[index];      // Red component
+      // unsigned char g = color_buffer[index + 1];  // Green component
+      // unsigned char b = color_buffer[index + 2];  // Blue component
+      // printf("[%u %u %u]", r,g,b);
+    }
+    // printf("\n");
   }
+  // printf("\n");
+  // color_buffer[0] = (unsigned char)255;
+  // color_buffer[1] = (unsigned char)255;
+  // color_buffer[2] = (unsigned char)255;
 
   // auto img = cv::Mat(viewport.height, viewport.width, CV_8UC3, color_buffer);
   // cv::cvtColor(img, cv_gray_buffer, cv::COLOR_BGR2RGB, 0);
   // cv::flip(cv_gray_buffer, cv_gray_buffer, 0);
   // cv::cvtColor(img, cv_gray_buffer, cv::COLOR_BGR2GRAY, 0);
   // gray_buffer = cv_gray_buffer.data;
-  // printf("doing!");
   // cv::imwrite("/home/rohit/rgb_img.jpg", cv_gray_buffer);
   // cv::cvtColor(cv_gray_buffer, cv_gray_buffer, cv::COLOR_RGB2GRAY, 0);
   // cv::waitKey(0);
-
-  // for (int i = 0; i < cv_gray_buffer.rows*cv_gray_buffer.cols; i++) {
-  //   depth_buffer[i] = (float)(cv_gray_buffer.data[i]);
-  // }
-  // for(int i = 0; i < cv_gray_buffer.rows; i++){
-  //   for(int j = 0; j < cv_gray_buffer.cols; j++){
-  //     depth_buffer[i*cv_gray_buffer.cols+j] = depth_buffer[i*cv_gray_buffer.cols+j+1] =
-  //               depth_buffer[i*cv_gray_buffer.cols+j+2] = cv_gray_buffer.data[i*cv_gray_buffer.cols + j + 0]; // B
-  //   }
-  // }
 
   mjr_drawPixels(color_buffer, nullptr, viewport, &sim->platform_ui->mjr_context());
   // glDrawPixels(viewport.width, viewport.height, GL_BGR, GL_UNSIGNED_BYTE, color_buffer);

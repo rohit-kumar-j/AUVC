@@ -79,7 +79,7 @@ extern "C" bool controllerUpdatePlug(mjModel *m, mjData *d) {
   // Qorn[3] = d->sensordata[3];
 
   quaternion_to_euler(Qorn[1], Qorn[2], Qorn[3], Qorn[0], &orn[0], &orn[1], &orn[2]);
-  printf("[0]: %0.3f | [1]: %0.3f | [2]: %0.3f\n", orn[0], orn[1], orn[2]);
+  // printf("[0]: %0.3f | [1]: %0.3f | [2]: %0.3f\n", orn[0], orn[1], orn[2]);
 
   // Target Orientation is (90,0,0)
   double target[3] = {0, 0, 70};
