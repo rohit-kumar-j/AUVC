@@ -1,4 +1,9 @@
 # Byte-compiled / optimized / DLL files
+**_exe
+**.dSYM
+stb**
+**.mp4
+.DS_Store
 __pycache__/
 *.py[cod]
 *$py.class

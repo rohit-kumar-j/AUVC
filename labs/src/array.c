@@ -1,10 +1,5 @@
 #include <stdio.h>
-
-void func(){
-    int y =4;
-    y =5;
-    printf("inside function!\n");
-}
+#include "test.h"
 
 int main(){
     int x=1;
